@@ -1,3 +1,7 @@
 # 2048 Project Report
 
-TODO:
+## Gameplay
+
+### Display format
+
+- grep for FIXME

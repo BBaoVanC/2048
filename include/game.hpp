@@ -8,9 +8,10 @@
 struct Tile {
     bool has_tile;
     // the exponent of the tile's value; the n in 2^n
-    int exp;
+    uint32_t exp;
 
-    Tile(int exp);
+    Tile();
+    Tile(uint32_t exp);
 };
 
 enum class Move {

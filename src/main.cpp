@@ -7,8 +7,8 @@ void test_display();
 
 int main() {
     // test the display function
-    //test_display();
-    //return 0;
+    test_display();
+    return 0;
 
     Display display;
 
