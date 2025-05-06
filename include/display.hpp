@@ -5,6 +5,9 @@
 
 class Display {
 private:
+    // remove the copy constructors thanks to rule of three
+    Display(const Display&);
+    Display& operator=(const Display&);
 public:
     Display();
     ~Display();
