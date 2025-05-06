@@ -10,7 +10,7 @@ void Display::update(Game &game) {
 
     std::cout << "\n";
 
-    uint32_t max_width =
+    uint32_t max_width = log10(1 <<
     for (size_t y = 0; y < BOARD_SIZE; y++) {
         std::cout << "| ";
         for (size_t x = 0; x < BOARD_SIZE; x++) {
