@@ -248,8 +248,8 @@ void Game::move(Move move) {
             for (ssize_t x = 0; x < BOARD_SIZE; x++) {
                 // possible moves can be either up/down or left/right
                 Tile *current = &this->board[x][y];
-                for (size_t diff = -1; diff <= 1; diff += 2) {
-                    if (x + diff < 0 || y + diff < 0) {
+                for (ssize_t diff = -1; diff <= 1; diff += 2) {
+                    if (x + diff < 0 || y + diff < 0 || x + diff >= BOARD_SIZE || y + diff >= BOARD_SIZE) {
                         // ignore out of bounds tiles
                         continue;
                     }
