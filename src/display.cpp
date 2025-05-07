@@ -2,15 +2,20 @@
 #include <iostream>
 #include <string>
 
+#include <ncurses.h>
+
 #include "display.hpp"
 #include "game.hpp"
 
 Display::Display() {
-    std::cout << "Welcome to 2048!\n" << std::endl;
+    initscr();
+    keypad(stdscr, TRUE);
+    noecho();
+    curs_set(0);
 }
 
 Display::~Display() {
-    std::cout << "\n\n" << "GAME OVER" << std::endl;
+    endwin();
 }
 
 static void print_horizontal_row_separator() {
