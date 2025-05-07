@@ -78,7 +78,7 @@ static Tile *get_tile_at_orientation(Tile board[BOARD_SIZE][BOARD_SIZE], bool or
 // repeat all of this for each row
 //
 // orientation: true = up/down; false = left/right
-// direction: true = up/right; false = left/down
+// direction: true = down/right; false = up/left
 // RETURNS: -1 if a move was not made, otherwise the score to be added
 static int64_t shift_tiles(Tile board[BOARD_SIZE][BOARD_SIZE], bool orientation, bool direction) {
     int64_t score_delta = -1;
@@ -86,6 +86,50 @@ static int64_t shift_tiles(Tile board[BOARD_SIZE][BOARD_SIZE], bool orientation,
     // j is the axis to be compressing along; k is the cross axis (vertical if shifting horizontally)
 
     // doesn't matter which direction we traverse the cross axis
+
+    for (size_t k = 0; k < BOARD_SIZE; k++) {
+        // too complex to write in a for loop definition
+        size_t j;
+        if (direction) {
+            j = 0;
+        } else {
+            j = BOARD_SIZE - 1;
+        }
+        while ((direction && j < BOARD_SIZE - 1) || (!direction && j > 0)) {
+            Tile *tile_current = get_tile_at_orientation(board, orientation, j, k);
+            Tile *tile_into;
+            if (direction) {
+                tile_into = get_tile_at_orientation(board, orientation, j + 1, k);
+            } else {
+                tile_into = get_tile_at_orientation(board, orientation, j - 1, k);
+            }
+            if (!tile_current->has_tile) {
+                // ignore it
+            } else if (!tile_into->has_tile) {
+                // move tile to empty space
+                *tile_into = *tile_current;
+                tile_current->has_tile = false;
+                // a move was made
+                if (score_delta == -1) { score_delta = 0; }
+            } else if (tile_current->exp == tile_into->exp) {
+                tile_into->exp++;
+                tile_current->has_tile = false;
+                // a move was made, and added score
+                if (score_delta == -1) { score_delta = 0; }
+                score_delta += 1 << tile_into->exp;
+            }
+
+            if (direction) {
+                j++;
+            } else {
+                j--;
+            }
+        }
+    }
+
+    return score_delta;
+
+    //
     for (size_t k = 0; k < BOARD_SIZE; k++) {
         // checking conditions will be too complex to write inside a for loop definition
         ssize_t j;
@@ -186,10 +230,10 @@ void Game::move(Move move) {
             score_delta = shift_tiles(this->board, false, true);
             break;
         case Move::Up:
-            score_delta = shift_tiles(this->board, true, true);
+            score_delta = shift_tiles(this->board, true, false);
             break;
         case Move::Down:
-            score_delta = shift_tiles(this->board, true, false);
+            score_delta = shift_tiles(this->board, true, true);
             break;
     }
 
