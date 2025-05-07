@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <ncurses.h>
+
 #include "display.hpp"
 #include "game.hpp"
 
@@ -12,25 +14,46 @@ int main() {
 
     Display display;
 
-    bool continue_playing = true;
-    while (continue_playing) {
-        std::cout << "\nNEW GAME\n" << std::endl;
+    bool continue_playing_new_games = true;
+    while (continue_playing_new_games) {
         Game game;
-        // todo; change from true
-        while (true) {
+        // TODO: condition
+        bool continue_playing = true;
+        while (continue_playing) {
             display.update(game);
-            std::cout << "Enter a move: ";
-            char move;
-            std::cin >> move;
-            switch (move) {
+
+            int ch;
+            ch = getch();
+            switch (ch) {
+                case 'a':
                 case 'h':
+                case KEY_LEFT:
                     game.move(Move::Left);
                     break;
+                case 's':
                 case 'j':
+                case KEY_DOWN:
                     game.move(Move::Down);
                     break;
-                default:
-                    std::cout << "Invalid move.";
+                case 'd':
+                case 'l':
+                case KEY_RIGHT:
+                    game.move(Move::Right);
+                    break;
+                case 'w':
+                case 'k':
+                case KEY_UP:
+                    game.move(Move::Up);
+                    break;
+
+                // quit
+                case 'q':
+                    continue_playing = false;
+                    continue_playing_new_games = false;
+                    break;
+                // restart
+                case 'r':
+                    continue_playing = false;
                     break;
             }
         }

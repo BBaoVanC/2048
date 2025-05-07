@@ -10,7 +10,7 @@
 
 Tile::Tile(): has_tile(false), exp(0) {}
 Tile::Tile(uint32_t exp): has_tile(true), exp(exp) {}
-bool Tile::operator==(const Tile& other) {
+bool Tile::operator==(const Tile& other) const {
     if (this->has_tile != other.has_tile) {
         return false;
     }
@@ -72,10 +72,38 @@ void Game::move(Move move) {
         // repeat all of this for each row
         case Move::Left:
             for (size_t y = 0; y < BOARD_SIZE; y++) {
-                for (size_t x = 3; x > 0; x--) {
-                    //if (
+                for (size_t x = BOARD_SIZE - 1; x > 0; x--) {
+                    Tile *left = &this->board[x - 1][y];
+                    Tile *right = &this->board[x][y];
+                    if (left->has_tile && *left == *right) {
+                        left->exp++;
+                        right->has_tile = false;
+                        break;
+                    }
+                }
+                ssize_t first_x = -1;
+                if (!this->board[0][y].has_tile) {
+                    // find the first tile
+                    for (size_t x = 0; x < BOARD_SIZE; x++) {
+                        if (this->board[x][y].has_tile) {
+                            first_x = x;
+                        }
+                    }
+                }
+                if (first_x > 0) {
+                    // we need to move everything left by first_x many tiles
+                    // skip the rightmost tile because it can be cleared after the loop
+                    for (size_t x = 0; x < BOARD_SIZE - 1; x++) {
+                        this->board[x][y] = this->board[x + first_x][y];
+                    }
+                    // clear that last tile
+                    this->board[BOARD_SIZE - 1][y].has_tile = false;
                 }
             }
+
+                        // FIXME debug
+                        this->board[0][0].has_tile = true;
+                        this->board[0][0].exp = 5;
             break;
     }
 }

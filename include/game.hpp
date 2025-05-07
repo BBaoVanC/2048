@@ -12,7 +12,7 @@ struct Tile {
 
     Tile();
     Tile(uint32_t exp);
-    bool operator==(const Tile& other);
+    bool operator==(const Tile& other) const;
 };
 
 enum class Move {
