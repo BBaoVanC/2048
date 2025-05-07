@@ -56,54 +56,146 @@ Game::Game(): board(), score(0), moves(0) {
     this->spawn_tile();
 }
 
-void Game::move(Move move) {
-    // whether to add to the moves counter
-    bool made_move = false;
-    switch (move) {
-        // this description based on the perspective of shifting left:
-        //
-        // first, merge any tiles that can be
-        // - start at the right, and see if there is an equal tile to the left
-        // - if there is, then delete add right to left, and delete right. otherwise, go left one tile and check again
-        // - done if we reach the leftmost tile. should not run the check since there's nothing to the left of it
-        //
-        // then, shift everything to the edge
-        //
-        // repeat all of this for each row
-        case Move::Left:
-            for (size_t y = 0; y < BOARD_SIZE; y++) {
-                for (size_t x = BOARD_SIZE - 1; x > 0; x--) {
-                    Tile *left = &this->board[x - 1][y];
-                    Tile *right = &this->board[x][y];
-                    if (left->has_tile && *left == *right) {
-                        left->exp++;
-                        right->has_tile = false;
-                        break;
-                    }
+// get tiles based on current x/y reference frame for the axes
+static Tile *get_tile_at_orientation(Tile board[BOARD_SIZE][BOARD_SIZE], bool orientation, size_t j, size_t k) {
+    if (orientation) {
+        return &board[k][j];
+    } else {
+        return &board[j][k];
+    }
+}
+// FIXME: remove this include
+#include <iostream>
+// this description based on the perspective of shifting left (orientation = false; direction = false):
+//
+// first, merge any tiles that can be
+// - start at the right, and see if there is an equal tile to the left
+// - if there is, then delete add right to left, and delete right. otherwise, go left one tile and check again
+// - done if we reach the leftmost tile. should not run the check since there's nothing to the left of it
+//
+// then, shift everything to the edge
+//
+// repeat all of this for each row
+//
+// orientation: true = up/down; false = left/right
+// direction: true = up/right; false = left/down
+// RETURNS: -1 if a move was not made, otherwise the score to be added
+static int64_t shift_tiles(Tile board[BOARD_SIZE][BOARD_SIZE], bool orientation, bool direction) {
+    int64_t score_delta = -1;
+
+    // j is the axis to be compressing along; k is the cross axis (vertical if shifting horizontally)
+
+    // doesn't matter which direction we traverse the cross axis
+    for (size_t k = 0; k < BOARD_SIZE; k++) {
+        // checking conditions will be too complex to write inside a for loop definition
+        ssize_t j;
+        if (direction) {
+            j = 0;
+        } else {
+            j = BOARD_SIZE - 1;
+        }
+        while ((direction && j < BOARD_SIZE - 1) || (!direction && j > 0)) {
+            // the tile to merge into
+            Tile *tile_merge;
+            if (direction) {
+                tile_merge = get_tile_at_orientation(board, orientation, j + 1, k);
+            } else {
+                tile_merge = get_tile_at_orientation(board, orientation, j - 1, k);
+            }
+            // the tile to delete from the merge
+            Tile *tile_delete = get_tile_at_orientation(board, orientation, j, k);
+            if (tile_merge->has_tile && *tile_merge == *tile_delete) {
+                board[0][0].has_tile = true;
+                board[0][0].exp = 5;
+                if (direction) {
+                    tile_delete->exp++;
+                    tile_merge->has_tile = false;
+                } else {
+                    tile_merge->exp++;
+                    tile_delete->has_tile = false;
                 }
-                ssize_t first_x = -1;
-                if (!this->board[0][y].has_tile) {
-                    // find the first tile
-                    for (size_t x = 0; x < BOARD_SIZE; x++) {
-                        if (this->board[x][y].has_tile) {
-                            first_x = x;
-                        }
-                    }
-                }
-                if (first_x > 0) {
-                    // we need to move everything left by first_x many tiles
-                    // skip the rightmost tile because it can be cleared after the loop
-                    for (size_t x = 0; x < BOARD_SIZE - 1; x++) {
-                        this->board[x][y] = this->board[x + first_x][y];
-                    }
-                    // clear that last tile
-                    this->board[BOARD_SIZE - 1][y].has_tile = false;
-                }
+                score_delta = 1 << tile_merge->exp;
+                break;
             }
 
-                        // FIXME debug
-                        this->board[0][0].has_tile = true;
-                        this->board[0][0].exp = 5;
+            if (direction) { j++; } else { j--; }
+        }
+
+        ssize_t first_j = -1;
+        if ( (!direction && !get_tile_at_orientation(board, orientation, 0, k)->has_tile) ||
+              (direction && !get_tile_at_orientation(board, orientation, BOARD_SIZE - 1, k)->has_tile) ) {
+            // find the first tile
+            ssize_t j;
+            if (direction) {
+                j = BOARD_SIZE - 1;
+            } else {
+                j = 0;
+            }
+            while ((direction && j >= 0) || (!direction && j < BOARD_SIZE)) {
+                if (get_tile_at_orientation(board, orientation, j, k)->has_tile) {
+                    first_j = j;
+                }
+                if (direction) { j--; } else { j++; }
+            }
+        }
+        std::cerr << k << ' ' << first_j;
+        std::cerr << "\n\n";
+        continue;
+
+        if (first_j > 0) {
+            if (score_delta == -1) {
+                // if we didn't combine anything but do need to shift over some stuff
+                score_delta = 0;
+            }
+
+            // we need to move everything left by first_j many tiles
+            // skip the rightmost tile because it can be cleared after the loop
+            size_t j;
+            if (direction) {
+                j = BOARD_SIZE - 1;
+            } else {
+                j = 0;
+            }
+            while ((direction && j > 0) || (!direction && j < BOARD_SIZE - 1)) {
+                if (direction) {
+                    *get_tile_at_orientation(board, orientation, j, k) = *get_tile_at_orientation(board, orientation, j - first_j, k);
+                } else {
+                    *get_tile_at_orientation(board, orientation, j, k) = *get_tile_at_orientation(board, orientation, j + first_j, k);
+                }
+                if (direction) { j--; } else { j++; }
+            }
+            // clear that last tile
+            if (direction) {
+                get_tile_at_orientation(board, orientation, 0, k)->has_tile = false;
+            } else {
+                get_tile_at_orientation(board, orientation, BOARD_SIZE - 1, k)->has_tile = false;
+            }
+        }
+    }
+
+    return score_delta;
+}
+void Game::move(Move move) {
+    // whether to add to the moves counter
+    int64_t score_delta;
+    switch (move) {
+        case Move::Left:
+            score_delta = shift_tiles(this->board, false, false);
             break;
+        case Move::Right:
+            score_delta = shift_tiles(this->board, false, true);
+            break;
+        case Move::Up:
+            score_delta = shift_tiles(this->board, true, true);
+            break;
+        case Move::Down:
+            score_delta = shift_tiles(this->board, true, false);
+            break;
+    }
+
+    if (score_delta >= 0) {
+        this->score += score_delta;
+        this->spawn_tile();
+        this->moves++;
     }
 }

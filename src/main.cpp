@@ -17,7 +17,11 @@ int main() {
     bool continue_playing_new_games = true;
     while (continue_playing_new_games) {
         Game game;
-        // TODO: condition
+
+        // for testing:
+        //game.board[1][1] = 4;
+        //game.board[0][1] = 4;
+
         bool continue_playing = true;
         while (continue_playing) {
             display.update(game);
