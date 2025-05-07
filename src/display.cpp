@@ -23,20 +23,20 @@ static void print_empty_row() {
     }
     std::cout << '|' << std::endl;
 }
-void Display::update(Game &game) {
+void Display::update(Game& game) {
     std::cout << "Score: " << game.score << "\n"
         << "Moves: " << game.moves << "\n";
 
     std::cout << "\n";
 
-    uint32_t largest_tile = 0;
-    for (auto t : game.board) {
-        if (t->has_tile && t->exp > largest_tile) {
-            largest_tile = t->exp;
-        }
-    }
-
     // FIXME: future improvement: calculate the width of tiles based on largest tile currently on the board
+    //
+    //uint32_t largest_tile = 0;
+    //for (auto t : game.board) {
+    //    if (t->has_tile && t->exp > largest_tile) {
+    //        largest_tile = t->exp;
+    //    }
+    //}
     //
     // // the amount of chars in n is equal to log_10
     // uint32_t max_width = log10(1 << largest_tile);
