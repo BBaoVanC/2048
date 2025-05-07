@@ -10,6 +10,18 @@
 
 Tile::Tile(): has_tile(false), exp(0) {}
 Tile::Tile(uint32_t exp): has_tile(true), exp(exp) {}
+bool Tile::operator==(const Tile& other) {
+    if (this->has_tile != other.has_tile) {
+        return false;
+    }
+
+    if (this->has_tile) {
+        return this->exp == other.exp;
+    } else {
+        // both this and other !has_tile (are empty)
+        return true;
+    }
+}
 
 void Game::spawn_tile() {
     // make sure there is an empty tile, otherwise we bail
@@ -25,8 +37,8 @@ void Game::spawn_tile() {
     assert(empty_tiles > 0);
 
     while (true) {
-        size_t x = rand() % 4;
-        size_t y = rand() % 4;
+        size_t x = rand() % BOARD_SIZE;
+        size_t y = rand() % BOARD_SIZE;
         Tile *t = &this->board[x][y];
         if (!t->has_tile) {
             t->has_tile = true;
@@ -46,9 +58,17 @@ Game::Game(): board(), score(0), moves(0) {
 
 void Game::move(Move move) {
     switch (move) {
+        // this description based on the perspective of shifting left:
+        // - start at the right, and see if there is an equal tile to the left
+        // - if there is, then combine. otherwise, go left one tile and check again
+        // - done if we reach the leftmost tile. should not run the check since there's nothing to the left of it
+        // repeat this for each row
         case Move::Left:
-            this->board[0][0].has_tile = true;
-            this->board[0][0].exp = 16;
+            for (size_t y = 0; y < BOARD_SIZE; y++) {
+                for (size_t x = 3; x > 0; x--) {
+                    if (this->board[x][y].
+                }
+            }
             break;
     }
 }

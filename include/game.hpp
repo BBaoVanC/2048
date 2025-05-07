@@ -12,6 +12,7 @@ struct Tile {
 
     Tile();
     Tile(uint32_t exp);
+    bool operator==(const Tile& other);
 };
 
 enum class Move {
@@ -19,6 +20,10 @@ enum class Move {
     Right,
     Up,
     Down,
+};
+
+enum class Status {
+    
 };
 
 class Game {

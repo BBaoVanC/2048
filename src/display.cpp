@@ -15,10 +15,10 @@ Display::~Display() {
 
 static void print_horizontal_row_separator() {
     // 4 cols, each 7 chars wide, plus 5 separator bars
-    std::cout << std::string(4 * 7 + 5, '-') << "\n";
+    std::cout << std::string(BOARD_SIZE * 7 + 5, '-') << "\n";
 }
 static void print_empty_row() {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < BOARD_SIZE; i++) {
         std::cout << '|' << std::string(7, ' ');
     }
     std::cout << '|' << std::endl;
@@ -28,19 +28,6 @@ void Display::update(Game& game) {
         << "Moves: " << game.moves << "\n";
 
     std::cout << "\n";
-
-    // FIXME: future improvement: calculate the width of tiles based on largest tile currently on the board
-    //
-    //uint32_t largest_tile = 0;
-    //for (auto t : game.board) {
-    //    if (t->has_tile && t->exp > largest_tile) {
-    //        largest_tile = t->exp;
-    //    }
-    //}
-    //
-    // // the amount of chars in n is equal to log_10
-    // uint32_t max_width = log10(1 << largest_tile);
-    // std::string tile_format = "{:" + std::to_string(max_width) + "}";
 
     for (size_t y = 0; y < BOARD_SIZE; y++) {
         print_horizontal_row_separator();
