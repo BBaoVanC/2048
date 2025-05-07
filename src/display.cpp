@@ -20,6 +20,7 @@ Display::~Display() {
 
 static void print_horizontal_row_separator() {
     // 4 cols, each 7 chars wide, plus 5 separator bars
+    printw(std::string(BOARD_SIZE * 7 + 5, '-'));
     std::cout << std::string(BOARD_SIZE * 7 + 5, '-') << "\n";
 }
 static void print_empty_row() {
@@ -29,8 +30,10 @@ static void print_empty_row() {
     std::cout << '|' << std::endl;
 }
 void Display::update(Game& game) {
-    std::cout << "Score: " << game.score << "\n"
-        << "Moves: " << game.moves << "\n";
+    mvprintw(0, 0, "Score: %s", game.score);
+    mvprintw(1, 0, "Moves: %s", game.moves);
+
+    mvprintw(3, 0,
 
     std::cout << "\n";
 
