@@ -57,16 +57,23 @@ Game::Game(): board(), score(0), moves(0) {
 }
 
 void Game::move(Move move) {
+    // whether to add to the moves counter
+    bool made_move = false;
     switch (move) {
         // this description based on the perspective of shifting left:
+        //
+        // first, merge any tiles that can be
         // - start at the right, and see if there is an equal tile to the left
-        // - if there is, then combine. otherwise, go left one tile and check again
+        // - if there is, then delete add right to left, and delete right. otherwise, go left one tile and check again
         // - done if we reach the leftmost tile. should not run the check since there's nothing to the left of it
-        // repeat this for each row
+        //
+        // then, shift everything to the edge
+        //
+        // repeat all of this for each row
         case Move::Left:
             for (size_t y = 0; y < BOARD_SIZE; y++) {
                 for (size_t x = 3; x > 0; x--) {
-                    if (this->board[x][y].
+                    //if (
                 }
             }
             break;
