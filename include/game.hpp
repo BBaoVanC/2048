@@ -23,7 +23,8 @@ enum class Move {
 };
 
 enum class Status {
-    
+    Playing,
+    Ended,
 };
 
 class Game {
@@ -36,6 +37,7 @@ public:
     Tile board[BOARD_SIZE][BOARD_SIZE];
     uint32_t score;
     uint32_t moves;
+    Status status;
 
     Game();
     void move(Move move);

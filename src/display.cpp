@@ -7,11 +7,21 @@
 #include "display.hpp"
 #include "game.hpp"
 
+#define MAX_COLOR 15
+
 Display::Display() {
     initscr();
     keypad(stdscr, TRUE);
     noecho();
     curs_set(0);
+
+    start_color();
+    use_default_colors();
+
+    for (int x = 1; x <= MAX_COLOR; x++) {
+        // id, fg, bg
+        init_pair(x, x, -1);
+    }
 }
 
 Display::~Display() {
@@ -59,9 +69,12 @@ void Display::update(Game& game) {
                 tile_text = std::to_string(1 << game.board[x][y].exp);
             }
 
-            //std::cout << std::vformat(tile_format, std::make_wformat_args(tile_text)) << " |";
-            std::string p = std::format("{:^7}|", tile_text);
+            int color = game.board[x][y].exp % 15 + 1;
+            attron(COLOR_PAIR(color));
+            std::string p = std::format("{:^7}", tile_text);
             printw("%s", p.c_str());
+            attroff(COLOR_PAIR(color));
+            printw("|");
         }
 
         cur_y++;
@@ -72,6 +85,10 @@ void Display::update(Game& game) {
     cur_y++;
     move(cur_y, 0);
     print_horizontal_row_separator();
+
+    if (game.status == Status::Ended) {
+        mvprintw(3, 0, "GAME OVER! Press r to play again.");
+    }
 
     refresh();
 }
