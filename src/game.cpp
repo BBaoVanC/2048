@@ -64,8 +64,6 @@ static Tile *get_tile_at_orientation(Tile board[BOARD_SIZE][BOARD_SIZE], bool or
         return &board[j][k];
     }
 }
-// FIXME: remove this include
-#include <iostream>
 // this description based on the perspective of shifting left (orientation = false; direction = false):
 //
 // first, merge any tiles that can be
@@ -123,96 +121,6 @@ static int64_t shift_tiles(Tile board[BOARD_SIZE][BOARD_SIZE], bool orientation,
                 j++;
             } else {
                 j--;
-            }
-        }
-    }
-
-    return score_delta;
-
-    //
-    for (size_t k = 0; k < BOARD_SIZE; k++) {
-        // checking conditions will be too complex to write inside a for loop definition
-        ssize_t j;
-        if (!direction) {
-            j = 0;
-        } else {
-            j = BOARD_SIZE - 1;
-        }
-        while ((!direction && j < BOARD_SIZE - 1) || (direction && j > 0)) {
-            // the tile to merge into
-            Tile *tile_merge;
-            if (!direction) {
-                tile_merge = get_tile_at_orientation(board, orientation, j + 1, k);
-            } else {
-                tile_merge = get_tile_at_orientation(board, orientation, j - 1, k);
-            }
-            // the tile to delete from the merge
-            Tile *tile_delete = get_tile_at_orientation(board, orientation, j, k);
-            if (tile_merge->has_tile && *tile_merge == *tile_delete) {
-                board[0][0].has_tile = true;
-                board[0][0].exp = 5;
-                if (!direction) {
-                    tile_delete->exp++;
-                    tile_merge->has_tile = false;
-                } else {
-                    tile_merge->exp++;
-                    tile_delete->has_tile = false;
-                }
-                score_delta = 1 << tile_merge->exp;
-                break;
-            }
-
-            if (!direction) { j++; } else { j--; }
-        }
-
-        ssize_t first_j = -1;
-        if ( (!direction && !get_tile_at_orientation(board, orientation, 0, k)->has_tile) ||
-              (direction && !get_tile_at_orientation(board, orientation, BOARD_SIZE - 1, k)->has_tile) ) {
-            // find the first tile
-            ssize_t j;
-            if (direction) {
-                j = BOARD_SIZE - 1;
-            } else {
-                j = 0;
-            }
-            while ((direction && j >= 0) || (!direction && j < BOARD_SIZE)) {
-                if (get_tile_at_orientation(board, orientation, j, k)->has_tile) {
-                    first_j = j;
-                }
-                if (direction) { j--; } else { j++; }
-            }
-        }
-        std::cerr << k << ' ' << first_j;
-        std::cerr << "\n\n";
-        continue;
-
-        if (first_j > 0) {
-            if (score_delta == -1) {
-                // if we didn't combine anything but do need to shift over some stuff
-                score_delta = 0;
-            }
-
-            // we need to move everything left by first_j many tiles
-            // skip the rightmost tile because it can be cleared after the loop
-            size_t j;
-            if (direction) {
-                j = BOARD_SIZE - 1;
-            } else {
-                j = 0;
-            }
-            while ((direction && j > 0) || (!direction && j < BOARD_SIZE - 1)) {
-                if (direction) {
-                    *get_tile_at_orientation(board, orientation, j, k) = *get_tile_at_orientation(board, orientation, j - first_j, k);
-                } else {
-                    *get_tile_at_orientation(board, orientation, j, k) = *get_tile_at_orientation(board, orientation, j + first_j, k);
-                }
-                if (direction) { j--; } else { j++; }
-            }
-            // clear that last tile
-            if (direction) {
-                get_tile_at_orientation(board, orientation, 0, k)->has_tile = false;
-            } else {
-                get_tile_at_orientation(board, orientation, BOARD_SIZE - 1, k)->has_tile = false;
             }
         }
     }
